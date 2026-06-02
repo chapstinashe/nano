@@ -1,15 +1,74 @@
+# --- Secrets and environment (never commit) ---
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+credentials.json
+credentials*.json
+secrets/
+.secrets/
+
+# --- Python ---
 __pycache__/
 *.py[cod]
-.env
+*$py.class
+*.so
+.Python
 .venv/
 venv/
-app/storage/chroma/*
-!app/storage/chroma/.gitkeep
-app/storage/uploads/*
-!app/storage/uploads/.gitkeep
-app/storage/metadata/*
-!app/storage/metadata/.gitkeep
-.pytest_cache/
+env/
+ENV/
 *.egg-info/
+.eggs/
 dist/
 build/
+pip-wheel-metadata/
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.mypy_cache/
+.ruff_cache/
+*.log
+
+# --- Local app data (user uploads, extracted text, vectors, metadata) ---
+app/storage/chroma/**
+!app/storage/chroma/.gitkeep
+app/storage/uploads/**
+!app/storage/uploads/.gitkeep
+app/storage/metadata/**
+!app/storage/metadata/.gitkeep
+app/storage/texts/**
+
+# --- Model / download caches ---
+.cache/
+.huggingface/
+hf_cache/
+
+# --- IDE and OS ---
+.idea/
+.vscode/
+.cursor/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Docker local overrides (may contain secrets) ---
+docker-compose.override.yml
+docker-compose.*.local.yml
+
+# --- Local-only / scratch ---
+body.json
+*.sqlite3
+*.db
+*.sqlite
+
+# --- Optional: local pip freeze with machine-specific -e installs ---
+# Uncomment if you only track requirements-docker.txt for deploy:
+# requirements.txt

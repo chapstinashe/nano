@@ -4,6 +4,11 @@ services:
     restart: unless-stopped
     volumes:
       - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   rag-api:
     build: .
@@ -13,11 +18,18 @@ services:
       - .env
     environment:
       RATE_LIMIT_STORAGE_URI: redis://redis:6379/0
+      # Paths inside the container (match volume mount below)
+      UPLOAD_PATH: /app/app/storage/uploads
+      METADATA_PATH: /app/app/storage/metadata
+      TEXT_PATH: /app/app/storage/texts
     depends_on:
-      - redis
+      redis:
+        condition: service_healthy
     volumes:
       - ./app/storage:/app/app/storage
+      - huggingface_cache:/app/.cache/huggingface
     restart: unless-stopped
 
 volumes:
   redis_data:
+  huggingface_cache:

@@ -1,0 +1,87 @@
+# --- Secrets and environment (never bake into image) ---
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+credentials.json
+credentials*.json
+secrets/
+.secrets/
+
+# --- Python / virtualenv ---
+.venv/
+venv/
+env/
+ENV/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
+dist/
+build/
+pip-wheel-metadata/
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.mypy_cache/
+.ruff_cache/
+*.log
+
+# --- Git (not needed in image) ---
+.git/
+.gitignore
+.github/
+
+# --- IDE and OS ---
+.idea/
+.vscode/
+.cursor/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Local app data (use volume mounts at runtime, not image layers) ---
+app/storage/chroma/**
+!app/storage/chroma/.gitkeep
+app/storage/uploads/**
+!app/storage/uploads/.gitkeep
+app/storage/metadata/**
+!app/storage/metadata/.gitkeep
+app/storage/texts/**
+
+# --- Model caches (use Compose volume huggingface_cache at runtime) ---
+.cache/
+.huggingface/
+hf_cache/
+
+# --- Dev / docs / tests (not needed in production image) ---
+tests/
+deploy/
+DOCUMENTATION.md
+body.json
+pytest.ini
+requirements-dev.txt
+requirements.txt
+docker-compose.yml
+docker-compose.override.yml
+docker-compose.*.local.yml
+README.md
+
+# --- Databases / local artifacts ---
+*.sqlite3
+*.db
+*.sqlite
+
+# --- Docker build context noise ---
+Dockerfile.*
+.dockerignore

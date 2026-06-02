@@ -33,9 +33,14 @@ Server starts at `http://localhost:5000`.
 
 ### 3. Docker
 
+See **[deploy/DOCKER.md](deploy/DOCKER.md)** for full setup from scratch (install Docker, `.env`, build, run, troubleshoot).
+
 ```bash
-docker compose up --build
+docker compose build
+docker compose up -d
 ```
+
+Uses `requirements-docker.txt` (not `requirements.txt`) so the image builds without local-only packages.
 
 ## API Endpoints
 
