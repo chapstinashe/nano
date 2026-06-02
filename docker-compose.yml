@@ -1,0 +1,23 @@
+services:
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+
+  rag-api:
+    build: .
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    environment:
+      RATE_LIMIT_STORAGE_URI: redis://redis:6379/0
+    depends_on:
+      - redis
+    volumes:
+      - ./app/storage:/app/app/storage
+    restart: unless-stopped
+
+volumes:
+  redis_data:

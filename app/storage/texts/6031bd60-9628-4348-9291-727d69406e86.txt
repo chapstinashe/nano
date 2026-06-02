@@ -1,0 +1,108 @@
+PROJECT CLAIM-AI
+Security Framework
+Semester 1 Technical Deliverable
+GenAI-Powered Catastrophe Claims & Insurance Accelerator
+1. Threat Model
+The threat model is structured around STRIDE and the OWASP LLM Top 10. Two user roles (claimant, assessor) feed an AI pipeline across three attack surfaces: the upload/intake endpoints, the RAG retrieval layer, and the LLM inference endpoint. The primary assets and threat-priority mappings are summarised below.
+2. Prompt Injection Defence
+Prompt injection is the highest-priority AI-specific risk for Claim-AI. A claimant submitting a free-text damage description, an image with embedded text (e.g. a handwritten note placed in front of damaged property), or a manipulated policy document could attempt to override the system prompt and influence the coverage decision. Defence follows OWASP's core principle: enforce separation between instructions and data in code, not just in prompts.
+2.1  Structural separation
+The system prompt, retrieved policy context, and claimant-supplied input occupy structurally distinct message roles. Raw user input is never interpolated into the system prompt string. The message payload is assembled server-side in FastAPI:
+# fastapi/services/prompt_builder.py
+messages = [
+    {"role": "system",    "content": LOCKED_SYSTEM_PROMPT},
+    {"role": "user",      "content": (
+        f"[POLICY CONTEXT]\n{rag_context}\n\n"
+        f"[CLAIMANT DESCRIPTION]\n{sanitised_input}"
+    )}
+]
+LOCKED_SYSTEM_PROMPT is a server-side module-level constant loaded from Azure Key Vault at startup. It is never constructed from request data.
+2.2  Input sanitisation (FastAPI dependency)
+A reusable FastAPI dependency strips or escapes characters commonly used in injection attempts before any string reaches the LLM. The dependency is injected on every claims-related route so it is impossible to bypass at the handler level.
+# fastapi/dependencies/sanitise.py
+INJECTION_PHRASES = [
+    r"ignore (previous|prior|above|all) instructions?",
+    r"(system|assistant)\s*:",
+    r"<(script|iframe|img)[^>]*>",
+]
+def sanitise_claim_input(text: str) -> str:
+    text = text[:2000]   # hard character cap
+    text = re.sub(r"<[^>]+>", "", text)
+    for phrase in INJECTION_PHRASES:
+        text = re.sub(phrase, "[redacted]", text, flags=re.IGNORECASE)
+    return text.strip()
+2.3  Output validation
+Before an LLM response reaches the assessor dashboard, a validation pass checks three conditions: (a) does the output contain system prompt fragments (potential leakage); (b) does it contain verbatim policy text exceeding a length threshold (data leakage); (c) does it include an explicit approval or denial string that bypasses the required human sign-off step. Outputs that fail these checks are quarantined and flagged for manual review, not silently passed through.
+2.4  Indirect injection (documents and images)
+All external documents and images are treated as hostile. Ingestion pipeline controls:
+OCR output is passed as data, never as instructions. The pipeline prefixes every OCR-derived string with a [DOCUMENT CONTENT] tag that the system prompt instructs the model to treat as evidence only.
+Image metadata (EXIF, ICC profiles, embedded XMP) is stripped before the image reaches the multimodal model endpoint.
+Policy PDS documents are pre-chunked and embedded at ingest time. Chunks are stored in the vector store with a source metadata field. At query time, only the relevant chunks are retrieved — the model never receives the full document in context.
+2.5  Adversarial evaluation suite
+Semester 1 must include a regression test suite of crafted adversarial inputs designed to jailbreak or manipulate the decision. This suite runs on every CI build. Minimum test cases include: role-override attempts, instruction-terminator injection, indirect injection via image text, and policy-wording manipulation.
+3. Authentication Design
+Authentication uses managed identity providers (Microsoft Entra ID) rather than custom credential storage. Building authentication from scratch in FastAPI for a financial services platform is not appropriate — it introduces credential storage risk, MFA complexity, and audit gaps that Entra solves by design. Entra provides OIDC-based SSO, conditional access, and audit logging as a certified, APRA-auditable service.
+3.1  Assessor dashboard — Entra ID + RBAC
+Assessors authenticate via Microsoft Entra ID using the OAuth 2.0 Authorization Code flow with PKCE. Entra supports OIDC SSO for custom applications; the assessor dashboard registers as an Entra app and receives signed JWTs (ID + access tokens).
+Conditional access policy requirements
+MFA enforced for all assessor accounts — no exceptions. Assessors make consequential financial decisions; MFA is non-negotiable.
+Compliant or Hybrid Azure AD joined device required.
+Sign-in risk policy: block High risk sign-ins, require step-up for Medium.
+Named location policy: flag sign-ins from outside Australia for manual review.
+RBAC roles (JWT claims)
+Roles are stored as Entra App Role assignments and surfaced as a roles claim in the JWT. FastAPI enforces the required role on each route via a reusable dependency — the frontend cannot bypass this:
+# fastapi/dependencies/auth.py
+def require_role(required: str):
+    async def checker(token: dict = Depends(verify_jwt)):
+        if required not in token.get("roles", []):
+            raise HTTPException(status_code=403)
+    return checker
+@router.post('/claims/{id}/decision')
+async def submit_decision(_ = Depends(require_role('assessor'))):
+    ...
+Access tokens are short-lived (15 min) with refresh token rotation. On logout or detected anomaly, refresh tokens are revoked via the Entra token revocation endpoint.
+3.2  Claimant portal — Entra External ID (OIDC + PKCE)
+The claimant portal is a public-facing web application; the client cannot hold a secret securely. The correct flow is OIDC with PKCE (Proof Key for Code Exchange), using Entra External ID (formerly Azure AD B2C) as the customer identity provider. This gives a hosted signup/signin UI, passwordless options, and built-in rate limiting on login and OTP flows — without reusing the internal assessor tenant.
+IDOR mitigation: The policy number is bound as a JWT claim at login. Every API call that touches claim data verifies the policy number in the JWT matches the resource being requested — enforced in the FastAPI dependency layer, not just the frontend.
+MFA is available as opt-in (not mandatory) for claimants in recognition of the disaster-context UX requirement — users may be on replacement or borrowed devices.
+Step-up authentication is triggered for sensitive actions: viewing a draft decision, submitting supporting evidence after initial lodgement.
+Email verification is required on signup. OTP send rate is capped to prevent abuse.
+Sessions are short-lived (30 min idle timeout). Claimant tokens carry no assessor-level scopes.
+4. Encryption Strategy
+Claim-AI uses a two-layer encryption model: TLS 1.3 for all data in transit, and AES-256 with customer-managed keys (CMK) for all data at rest. All cryptographic keys are managed exclusively through Azure Key Vault — never in environment variables, .env files, or application configuration committed to version control.
+4.1  In transit
+TLS 1.3 minimum on all connections: client → API Gateway, API Gateway → FastAPI, FastAPI → Azure OpenAI endpoint, FastAPI → Azure AI Search (vector store), FastAPI → Azure SQL.
+TLS 1.2 fallback is explicitly disabled in production. Certificate management via Azure Key Vault with auto-rotation.
+All LLM API traffic is routed through an Azure Private Endpoint / VNet Service Endpoint so claim content (photos, policy excerpts, claimant descriptions) never traverses the public internet. This is a hard requirement for Australian financial services data and is mandated by APRA CPS 234 for material third-party services.
+4.2  At rest (envelope encryption with CMK)
+Azure supports service-managed keys, customer-managed keys in Key Vault, and customer-managed keys on customer-controlled hardware. CMK is the required pattern for Claim-AI — it gives the insurer demonstrable control over their data, a direct audit trail of decrypt operations, and the ability to revoke access instantly by disabling the master key.
+Data store mapping
+4.3  Key management rules
+Separate key hierarchies for dev, test, and production. A key that has ever touched production data is never used in lower environments.
+Key rotation policy: annual minimum for storage keys, 90-day rotation for LLM API keys (automated via Key Vault rotation policy).
+FastAPI retrieves secrets at startup via the Azure SDK using a Managed Identity — no credentials are stored in application config or passed as environment variables in CI/CD pipelines.
+Decrypt operations are auditable: every Key Vault access generates an event in Azure Monitor, which feeds the SIEM.
+5. Compliance & Australian Data Residency
+5.1  Data residency — Azure Australia East (Sydney)
+All Claim-AI compute, storage, and AI inference is pinned to Azure Australia East (Sydney). Cross-region replication to non-Australian regions is disabled. Standard and regional Azure OpenAI deployments process data in the deployment region; the global deployment type, which may route to any Azure region, is explicitly not used.
+The private endpoint architecture reinforces this: LLM API calls are made via an Azure Private Endpoint within the Australian VNet, so traffic never exits the Azure Australia East region even at the network layer.
+5.2  Privacy Act 1988 — Australian Privacy Principles
+The relevant APPs for Claim-AI are:
+APP 1 (Open and transparent management): a Privacy Impact Assessment (PIA) should be conducted before production launch, covering how the LLM uses claimant data and what the model retains.
+APP 3 (Collection of solicited personal information): collect only what is required to assess the claim — photos, policy number, incident description. The system is not permitted to request additional data fields beyond what the claim form specifies.
+APP 6 (Use or disclosure): claim data is used solely for claim assessment. It is not used to train the LLM (configure the Azure OpenAI deployment with the 'no training' opt-out).
+APP 8 (Cross-border disclosure): the AU-region pinning approach means personal information does not leave Australia, avoiding the need for APP 8 cross-border disclosure obligations.
+APP 11 (Security of personal information): entities must take reasonable steps to protect personal information from misuse, interference, loss, and unauthorised access, modification, or disclosure. The encryption, access control, and audit logging controls in Sections 3 and 4 directly discharge this obligation.
+5.3  APRA CPS 234 (Information Security)
+CPS 234 applies to all APRA-regulated entities and their material service providers. Claim-AI and the Deloitte delivery team are material third-party service providers for any Tier-1 bank client. Key obligations:
+Maintain an information security capability commensurate with the size and extent of information security vulnerabilities and threats.
+Define information asset registers covering data held or processed by third parties (i.e. the LLM provider and vector store).
+Notify APRA within 72 hours of a material information security incident. Claim-AI must have an incident response runbook prepared before go-live.
+Annual penetration testing and vulnerability assessments. The adversarial evaluation suite (Section 2.5) and STRIDE threat model (Section 1) directly support the CPS 234 testing requirement.
+Boards of APRA-regulated entities must be satisfied third-party information security is adequate. The security framework document itself (i.e. this deliverable) is a direct input to that board assurance process.
+5.4  Semester 1 compliance deliverables
+The following artefacts should accompany this security framework as Semester 1 outputs:
+Data Flow Diagram (DFD): maps where personal information is held, which pipeline components touch it, and where it crosses trust boundaries. This is a standard artefact requested by APRA examiners.
+Information Asset Register: lists all data stores, the classification of data held, the encryption method, and the responsible team.
+Incident Response Runbook: covers the 72-hour APRA notification requirement and internal escalation path.
+Adversarial Test Report: results of the prompt injection red-team suite (Section 2.5), documenting test cases, findings, and mitigations applied.

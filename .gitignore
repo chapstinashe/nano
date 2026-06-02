@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+.env
+.venv/
+venv/
+app/storage/chroma/*
+!app/storage/chroma/.gitkeep
+app/storage/uploads/*
+!app/storage/uploads/.gitkeep
+app/storage/metadata/*
+!app/storage/metadata/.gitkeep
+.pytest_cache/
+*.egg-info/
+dist/
+build/

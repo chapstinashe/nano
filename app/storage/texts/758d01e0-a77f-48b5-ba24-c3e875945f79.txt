@@ -1,0 +1,39 @@
+In python fastAPI please make me a program that is like a council of models. The app should have a model from openAI, Anthropic, Grok and Gemini. The app should allow to create a project. A project is like a way to distinguishing a task from the rest of other tasks, like resource groups groups group resources in Azure. The models should always work as a team ie like group work and come up with solutions to problems. The models should discuss ideas, come up with plans and ways to address the problem at hand, they should work autonomosly and continously until a solution is reached. For each project, each model should have and mantain an md file that will save as it's memory. The memory md file should save everything important and the model should always use it when working on the project. Overally the models should work together, collaborate and solve problems. HELP ME WITH THIS AND ADDRESS OTHER POINTS I MIGHT HAVE MISSED IF THEY WILL IMPROVE THE APP.
+
+
+
+##############################################################################################################Rewrote v1
+
+Build a Python application using FastAPI that orchestrates a “Council of Models” — a collaborative system where multiple leading AI models (OpenAI, Anthropic, Grok, and Gemini) work together as an autonomous problem-solving team.
+
+The application should support the concept of Projects, which act as isolated workspaces (similar to resource groups in Azure). Each project represents a distinct problem or objective and keeps all related context, discussions, and outputs contained and organized.
+
+Within each project:
+
+Every model participates as a team member, not an isolated responder.
+Models continuously collaborate, debate, refine ideas, and converge on solutions through iterative discussion.
+The system should simulate ongoing group work, where models build on each other’s reasoning rather than responding once.
+
+Each model must also maintain its own persistent memory file (Markdown format) within the project:
+
+This file acts as the model’s evolving knowledge base.
+It should store key insights, decisions, hypotheses, and important context.
+Models are required to read from and update their memory as part of every interaction, ensuring continuity and long-term reasoning.
+
+The system should:
+
+Enable autonomous, continuous execution, where the models keep working until a defined goal or solution is reached.
+Facilitate structured multi-model dialogue, including planning, critique, and synthesis phases.
+Provide visibility into the reasoning process, not just the final answer.
+Ensure coordination between models so they act as a cohesive unit, not four disconnected APIs.
+
+Additionally, design the system to be extensible and robust by:
+
+Supporting pluggable model providers and easy configuration of API keys
+Managing concurrency and rate limits across multiple APIs
+Tracking project state, progress, and iteration history
+Allowing human intervention or guidance when needed
+Logging all interactions for debugging and evaluation
+Defining stopping conditions, success criteria, and failure handling
+
+The end goal is to create an intelligent, self-organizing, multi-model collaboration engine that mimics a high-performing team—capable of tackling complex problems through structured discussion, shared memory, and iterative refinement.

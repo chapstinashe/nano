@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nano</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}" />
+</head>
+<body>
+  <!-- Sidebar backdrop (mobile) -->
+  <div class="sidebar-backdrop hidden" id="sidebarBackdrop"></div>
+
+  <div class="app" id="app">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-top">
+        <button class="icon-btn sidebar-toggle" id="sidebarClose" type="button" aria-label="Close sidebar">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+        <button class="sidebar-item new-chat-btn" id="newChatBtn" type="button">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+          <span>New chat</span>
+        </button>
+      </div>
+
+      <nav class="sidebar-nav">
+        <button class="sidebar-item" id="searchChatsBtn" type="button">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          <span>Search chats</span>
+        </button>
+        <button class="sidebar-item" id="uploadsBtn" type="button">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <span>Uploads</span>
+        </button>
+        <button class="sidebar-item" id="featuresBtn" type="button">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          <span>Features</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-chats" id="chatHistoryList"></div>
+
+      <div class="sidebar-bottom">
+        <button class="sidebar-item" id="settingsBtn" type="button">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          <span>Settings</span>
+        </button>
+        <button class="sidebar-item" id="helpBtn" type="button">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <span>Help</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="main">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="icon-btn sidebar-panel-btn" id="sidebarPanelBtn" type="button" aria-label="Toggle sidebar">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg>
+          </button>
+          <button class="icon-btn hamburger-btn" id="hamburgerBtn" type="button" aria-label="Toggle menu">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          </button>
+          <div class="brand-dropdown" id="brandDropdown">
+            <button class="brand-btn" id="brandBtn" type="button">
+              <span class="nano-logo">n</span>
+              <span class="brand-name">Nano</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="dropdown-menu hidden" id="brandMenu">
+              <button type="button" data-action="about">About Nano</button>
+              <button type="button" data-action="documents">Indexed documents</button>
+            </div>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <span class="auth-status" id="authStatus">Guest</span>
+          <button class="btn-secondary btn-sm" id="loginBtn" type="button">Login</button>
+          <button class="btn-secondary btn-sm" id="registerBtn" type="button">Register</button>
+          <button class="btn-secondary btn-sm hidden" id="logoutBtn" type="button">Logout</button>
+          <button class="icon-btn theme-toggle" id="themeToggle" type="button" aria-label="Toggle theme">
+            <svg class="icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            <svg class="icon-moon hidden" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          </button>
+        </div>
+      </header>
+
+      <div class="chat-area" id="chatArea">
+        <div class="welcome" id="welcome">
+          <h1>Need an answer? Ask away</h1>
+        </div>
+        <div class="messages hidden" id="messages"></div>
+      </div>
+
+      <div class="input-area">
+        <form class="input-form" id="chatForm">
+          <div class="input-box">
+            <button class="input-action" id="attachBtn" type="button" aria-label="Upload files">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+            </button>
+            <textarea id="chatInput" rows="1" placeholder="Ask anything" autocomplete="off"></textarea>
+            <button class="send-btn" id="sendBtn" type="submit" aria-label="Send message" disabled>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg>
+            </button>
+          </div>
+        </form>
+        <p class="footer-note">Nano can make mistakes. Check important info from your uploaded documents.</p>
+      </div>
+    </main>
+  </div>
+
+  <!-- Upload Modal -->
+  <div class="modal-overlay hidden" id="uploadModal">
+    <div class="modal" role="dialog" aria-labelledby="uploadModalTitle">
+      <div class="modal-header">
+        <h2 id="uploadModalTitle">Upload documents</h2>
+        <button class="icon-btn modal-close" id="uploadModalClose" type="button" aria-label="Close">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="dropzone" id="dropzone">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <p class="dropzone-title">Drag and drop files here</p>
+          <p class="dropzone-sub">PDF, DOCX, TXT, CSV, XLSX — multiple files supported</p>
+          <button class="btn-secondary" id="browseFilesBtn" type="button">Browse files</button>
+          <input type="file" id="fileInput" multiple accept=".pdf,.docx,.txt,.csv,.xlsx" hidden />
+        </div>
+        <ul class="file-list" id="fileList"></ul>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-ghost" id="clearFilesBtn" type="button">Clear all</button>
+        <button class="btn-primary" id="uploadAllBtn" type="button" disabled>Upload &amp; index</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search Chats Modal -->
+  <div class="modal-overlay hidden" id="searchModal">
+    <div class="modal modal-sm" role="dialog">
+      <div class="modal-header">
+        <h2>Search chats</h2>
+        <button class="icon-btn modal-close" data-close="searchModal" type="button" aria-label="Close">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <input class="search-input" id="chatSearchInput" type="search" placeholder="Search your conversations..." />
+        <ul class="search-results" id="chatSearchResults"></ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div class="modal-overlay hidden" id="settingsModal">
+    <div class="modal modal-sm" role="dialog">
+      <div class="modal-header">
+        <h2>Settings</h2>
+        <button class="icon-btn modal-close" data-close="settingsModal" type="button" aria-label="Close">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body settings-body">
+        <label class="setting-row">
+          <span>Theme</span>
+          <select id="themeSelect">
+            <option value="dark">Dark</option>
+            <option value="light">Light</option>
+            <option value="system">System</option>
+          </select>
+        </label>
+        <button class="btn-ghost danger" id="clearHistoryBtn" type="button">Clear chat history</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Login Modal -->
+  <div class="modal-overlay auth-overlay hidden" id="loginModal">
+    <div class="modal modal-sm auth-modal" role="dialog">
+      <div class="modal-header">
+        <h2>Login</h2>
+        <button class="icon-btn modal-close" data-close="loginModal" type="button" aria-label="Close">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form class="auth-form" id="loginForm">
+          <label>Email
+            <input id="loginEmail" type="email" required autocomplete="email" />
+          </label>
+          <label>Password
+            <input id="loginPassword" type="password" required autocomplete="current-password" />
+          </label>
+          <button class="btn-primary" type="submit">Login</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Register Modal -->
+  <div class="modal-overlay auth-overlay hidden" id="registerModal">
+    <div class="modal modal-sm auth-modal" role="dialog">
+      <div class="modal-header">
+        <h2>Create account</h2>
+        <button class="icon-btn modal-close" data-close="registerModal" type="button" aria-label="Close">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form class="auth-form" id="registerForm">
+          <label style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden" aria-hidden="true">Website
+            <input id="registerWebsite" type="text" name="website" tabindex="-1" autocomplete="off" />
+          </label>
+          <label>Email
+            <input id="registerEmail" type="email" required autocomplete="email" />
+          </label>
+          <label>Password
+            <input id="registerPassword" type="password" minlength="8" required autocomplete="new-password" />
+          </label>
+          <button class="btn-primary" type="submit">Register</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Help Modal -->
+  <div class="modal-overlay hidden" id="helpModal">
+    <div class="modal modal-sm" role="dialog">
+      <div class="modal-header">
+        <h2>Help</h2>
+        <button class="icon-btn modal-close" data-close="helpModal" type="button" aria-label="Close">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body help-body">
+        <h3>Getting started</h3>
+        <ol>
+          <li>Upload documents via <strong>Uploads</strong> in the sidebar.</li>
+          <li>Wait for files to be indexed.</li>
+          <li>Ask questions in the chat — answers come from your documents.</li>
+        </ol>
+        <h3>Shortcuts</h3>
+        <ul>
+          <li><kbd>Enter</kbd> — Send message</li>
+          <li><kbd>Shift</kbd> + <kbd>Enter</kbd> — New line</li>
+          <li><kbd>Ctrl</kbd> + <kbd>K</kbd> — Search chats</li>
+          <li><kbd>Ctrl</kbd> + <kbd>U</kbd> — Open uploads</li>
+          <li><kbd>Ctrl</kbd> + <kbd>N</kbd> — New chat</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Features Modal -->
+  <div class="modal-overlay hidden" id="featuresModal">
+    <div class="modal modal-sm" role="dialog">
+      <div class="modal-header">
+        <h2>Features</h2>
+        <button class="icon-btn modal-close" data-close="featuresModal" type="button" aria-label="Close">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="app-cards">
+          <div class="app-card">
+            <div class="app-card-icon">📄</div>
+            <h3>Document Q&amp;A</h3>
+            <p>Upload PDF, DOCX, TXT, CSV, or XLSX files and ask questions — Nano retrieves the most relevant passages automatically.</p>
+            <button class="btn-secondary btn-sm" data-open="uploadModal" type="button">Open uploads</button>
+          </div>
+          <div class="app-card">
+            <div class="app-card-icon">📚</div>
+            <h3>Knowledge base</h3>
+            <p>View how many documents are indexed and ready for questions.</p>
+            <button class="btn-secondary btn-sm" id="viewDocumentsBtn" type="button">View indexed documents</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Documents Modal -->
+  <div class="modal-overlay hidden" id="documentsModal">
+    <div class="modal" role="dialog">
+      <div class="modal-header">
+        <h2>Indexed documents</h2>
+        <button class="icon-btn modal-close" data-close="documentsModal" type="button" aria-label="Close">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p class="documents-sub" id="documentsCount">Loading...</p>
+        <ul class="documents-list" id="documentsList"></ul>
+        <p class="documents-empty hidden" id="documentsEmpty">No documents indexed yet. Upload files to get started.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" data-open="uploadModal" type="button">Upload more</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Source Document Modal -->
+  <div class="modal-overlay hidden" id="sourceDocModal">
+    <div class="modal" role="dialog" aria-labelledby="sourceDocTitle">
+      <div class="modal-header">
+        <h2 id="sourceDocTitle">Source document</h2>
+        <button class="icon-btn modal-close" data-close="sourceDocModal" type="button" aria-label="Close">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p class="documents-sub" id="sourceDocMeta"></p>
+        <pre class="source-doc" id="sourceDocText"></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- About Modal -->
+  <div class="modal-overlay hidden" id="aboutModal">
+    <div class="modal modal-sm" role="dialog">
+      <div class="modal-header">
+        <h2>About Nano</h2>
+        <button class="icon-btn modal-close" data-close="aboutModal" type="button" aria-label="Close">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body about-body">
+        <div class="about-hero">
+          <span class="nano-logo about-logo">n</span>
+          <div>
+            <h3>Nano</h3>
+            <p class="about-tagline">Your document intelligence assistant</p>
+          </div>
+        </div>
+        <p>Nano is a retrieval-augmented generation (RAG) assistant that lets you upload documents and ask questions in natural language. Answers are grounded in your own files — not generic web knowledge.</p>
+        <h4>What Nano can do</h4>
+        <ul>
+          <li>Upload PDF, DOCX, TXT, CSV, and XLSX files</li>
+          <li>Index and search your content semantically</li>
+          <li>Answer questions using the most relevant passages from your documents</li>
+          <li>Download and manage indexed files</li>
+        </ul>
+        <h4>How it works</h4>
+        <p>When you upload a file, Nano extracts the text, splits it into searchable chunks, and stores them in a vector database. When you ask a question, Nano finds the best matching chunks and uses them to generate a focused answer.</p>
+        <p class="about-footnote">Built for teams who need fast, accurate answers from their own knowledge base.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Info toast -->
+  <div class="toast hidden" id="toast"></div>
+
+  <script src="{{ url_for('static', filename='js/api.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/guest_storage.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/guest_documents.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

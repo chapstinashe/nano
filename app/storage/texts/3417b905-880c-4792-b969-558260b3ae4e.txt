@@ -1,0 +1,81 @@
+Project Proposal: Project Claim-AI 
+Subtitle: GenAI-Powered Catastrophe Claims & Insurance Accelerator 
+Target Clients: Deloitte Financial Services Practice / Tier-1 Australian Banks (e.g., CBA, 
+Westpac, Insurance Australia Group) 
+ 
+1. Executive Summary 
+In the wake of increasing natural disasters in Australia (floods, bushfires, cyclones), 
+insurance providers are overwhelmed by "catastrophe peaks"—sudden surges of 
+thousands of claims that break manual processing workflows. Project Claim-AI is a 
+two-semester initiative to build a multimodal GenAI agent that automates the triage, 
+verification, and drafting of insurance claims. By "seeing" damage in photos and 
+"reading" complex policy PDS (Product Disclosure Statements), Claim-AI reduces initial 
+claim assessment time from days to minutes. 
+ 
+2. The Problem Statement 
+Current insurance claiming is a high-friction process: 
+• Operational Bottlenecks: Manual review of thousands of low-complexity 
+claims during disasters leads to burnout and 4+ week delays. 
+• Inconsistency: Different assessors may interpret "storm damage" vs. "flood 
+damage" differently. 
+• Customer Trauma: In disaster scenarios, customers need immediate certainty; 
+waiting weeks for an initial assessment worsens the mental health toll. 
+ 
+3. The Solution: Claim-AI 
+A GenAI-driven platform that acts as a "Co-Pilot" for insurance assessors. It performs 
+three core functions: 
+
+1. Multimodal Ingestion: Extracts data from photos (e.g., a collapsed roof) and 
+identifies the severity and type of damage. 
+2. Policy Reasoning: Compares the visual evidence against the specific 
+customer’s policy wording to determine coverage. 
+3. Drafting & Explanation: Generates a "Decision Memo" for the human assessor 
+and a plain-English explanation for the customer. 
+ 
+4. Semester 1: Technical Architecture & Design 
+Focus: Designing the "Brain" and the Guardrails. 
+Key Deliverables: 
+• Data Pipeline Design: A secure "Privacy-First" architecture that strips PII 
+(Personally Identifiable Information) before sending data to an LLM. 
+• LLM Selection & Benchmarking: Evaluating Azure OpenAI or AWS Bedrock 
+(ensuring Australian data residency) for vision and reasoning capabilities. 
+• RAG Strategy: Designing the Retrieval-Augmented Generation system to query 
+thousands of pages of insurance policies. 
+• Security Framework: Threat modeling for "Prompt Injection" (e.g., a customer 
+trying to trick the AI into approving a fraudulent claim). 
+ 
+5. Semester 2: Implementation & MVP 
+Focus: Building the Agent and the User Interface. 
+Key Deliverables: 
+• The "Assessor Dashboard": A React/Next.js frontend where Deloitte Product 
+Owners can see the AI's "Confidence Score" and reasoning. 
+• Multimodal Agentic Workflow: Implementing a system where a Vision Model 
+(like GPT-4o or Claude 3.5 Sonnet) analyzes images and passes findings to a 
+text-based "Policy Agent." 
+• Human-in-the-Loop (HITL) Integration: A system where the AI proposes a 
+payout, but a human must verify and click "Approve." 
+• Automated Audit Trail: A feature that logs exactly why the AI made a 
+recommendation (essential for Australian APRA/ASIC compliance). 
+
+ 
+6. Team Roles (5 Curtin Students) 
+Role 
+Responsibility 
+Lead Architect (SE) 
+Design of the Multi-Agent orchestration 
+(LangChain/AutoGen). 
+AI/ML Specialist (CS) 
+Prompt engineering, VLM (Vision-
+Language Model) tuning, and RAG 
+optimisation. 
+Cyber Security Lead 
+Implementation of data masking, 
+encryption at rest, and AI safety 
+guardrails. 
+Frontend/UX Dev (SE) 
+Building the "Trust-Centric" dashboard 
+for insurance assessors. 
+Cloud & Data Eng (CS) 
+Setting up the AWS/Azure infrastructure 
+and the vector database 
+(Pinecone/Weaviate).
