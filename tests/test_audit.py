@@ -15,7 +15,10 @@ def test_sanitize_details_redacts_secrets():
     assert sanitized["email"] == "b***@test.com"
 
 
-def test_log_security_event_emits_json():
+def test_log_security_event_emits_json(monkeypatch):
+    monkeypatch.setattr("app.core.config.Config.AUTH_ENABLED", False)
+    monkeypatch.setattr("app.db.cosmos.ensure_all_containers", lambda: None)
+
     from app import create_app
 
     app = create_app()
