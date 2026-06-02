@@ -55,6 +55,32 @@
     return window.innerWidth <= MOBILE_BREAKPOINT;
   }
 
+  function initMobileViewport() {
+    const root = document.documentElement;
+    const mq = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT}px)`);
+
+    function syncLayoutHeight() {
+      if (!mq.matches) {
+        root.style.removeProperty("--layout-height");
+        return;
+      }
+      const vv = window.visualViewport;
+      if (vv) {
+        root.style.setProperty("--layout-height", `${Math.round(vv.height)}px`);
+      } else {
+        root.style.removeProperty("--layout-height");
+      }
+    }
+
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener("resize", syncLayoutHeight);
+      window.visualViewport.addEventListener("scroll", syncLayoutHeight);
+    }
+    window.addEventListener("resize", syncLayoutHeight);
+    mq.addEventListener("change", syncLayoutHeight);
+    syncLayoutHeight();
+  }
+
   function openSidebar() {
     state.sidebarOpen = true;
     els.sidebar.classList.add("open");
@@ -1595,6 +1621,7 @@
     loadState();
     initTheme();
     initSidebarLayout();
+    initMobileViewport();
 
     if (!state.activeChatId && state.chats.length) {
       state.activeChatId = state.chats[0].id;
