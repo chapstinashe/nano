@@ -261,8 +261,6 @@ a { color: inherit; }
   padding: 0.625rem 1rem;
   min-height: 52px;
   flex-shrink: 0;
-  position: sticky;
-  top: 0;
   z-index: 110;
   background: var(--bg-primary);
   border-bottom: 1px solid var(--border-light);
@@ -912,8 +910,6 @@ a { color: inherit; }
   width: 100%;
   margin: 0 auto;
   flex-shrink: 0;
-  position: sticky;
-  bottom: 0;
   z-index: 110;
   background: var(--bg-primary);
   border-top: 1px solid var(--border-light);
@@ -1563,8 +1559,22 @@ a { color: inherit; }
 
 /* ===== Responsive ===== */
 @media (max-width: 768px) {
+  html,
+  body {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
   .app {
+    position: fixed;
+    top: var(--layout-offset-top, 0px);
+    left: 0;
+    right: 0;
+    width: 100%;
     height: var(--layout-height, 100dvh);
+    max-height: var(--layout-height, 100dvh);
   }
 
   .topbar {
@@ -1576,12 +1586,17 @@ a { color: inherit; }
   }
 
   .sidebar {
-    position: fixed;
+    position: absolute;
     top: 0;
     left: 0;
-    height: var(--layout-height, 100dvh);
+    height: 100%;
     transform: translateX(-100%);
     box-shadow: 4px 0 24px var(--shadow);
+  }
+
+  .sidebar-backdrop {
+    top: var(--layout-offset-top, 0px);
+    height: var(--layout-height, 100dvh);
   }
 
   .sidebar.open {

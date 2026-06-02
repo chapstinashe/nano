@@ -8,6 +8,8 @@
   const MAX_TOP_K = 8;
   const MOBILE_BREAKPOINT = 768;
 
+  let syncMobileLayout = null;
+
   const state = {
     chats: [],
     activeChatId: null,
@@ -62,23 +64,40 @@
     function syncLayoutHeight() {
       if (!mq.matches) {
         root.style.removeProperty("--layout-height");
+        root.style.removeProperty("--layout-offset-top");
         return;
       }
+
       const vv = window.visualViewport;
-      if (vv) {
-        root.style.setProperty("--layout-height", `${Math.round(vv.height)}px`);
-      } else {
+      if (!vv) {
         root.style.removeProperty("--layout-height");
+        root.style.removeProperty("--layout-offset-top");
+        return;
       }
+
+      root.style.setProperty("--layout-height", `${Math.round(vv.height)}px`);
+      root.style.setProperty("--layout-offset-top", `${Math.round(vv.offsetTop)}px`);
     }
+
+    syncMobileLayout = syncLayoutHeight;
 
     if (window.visualViewport) {
       window.visualViewport.addEventListener("resize", syncLayoutHeight);
       window.visualViewport.addEventListener("scroll", syncLayoutHeight);
     }
     window.addEventListener("resize", syncLayoutHeight);
+    window.addEventListener("orientationchange", syncLayoutHeight);
     mq.addEventListener("change", syncLayoutHeight);
     syncLayoutHeight();
+  }
+
+  function stabilizeMobileInputFocus() {
+    if (!isMobile()) return;
+    window.scrollTo(0, 0);
+    requestAnimationFrame(() => {
+      syncMobileLayout?.();
+      scrollToBottom();
+    });
   }
 
   function openSidebar() {
@@ -1501,6 +1520,8 @@
       autoResizeInput();
       updateSendBtn();
     });
+
+    els.chatInput.addEventListener("focus", stabilizeMobileInputFocus);
 
     els.chatInput.addEventListener("keydown", (e) => {
       if (e.key === "Enter" && !e.shiftKey) {
