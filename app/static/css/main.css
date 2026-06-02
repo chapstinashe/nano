@@ -1590,13 +1590,18 @@ a { color: inherit; }
     top: 0;
     left: 0;
     height: 100%;
+    z-index: 300;
     transform: translateX(-100%);
     box-shadow: 4px 0 24px var(--shadow);
   }
 
   .sidebar-backdrop {
-    top: var(--layout-offset-top, 0px);
-    height: var(--layout-height, 100dvh);
+    display: none !important;
+  }
+
+  .main {
+    position: relative;
+    z-index: 1;
   }
 
   .sidebar.open {
